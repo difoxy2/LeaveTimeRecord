@@ -1,0 +1,226 @@
+//code.gs
+function doGet() {
+  return HtmlService.createHtmlOutputFromFile('Index');
+}
+
+function doSomething(timestamp,leaveDate, leaveTime, TOorTOA, calculateFrom) {
+  var sheet = SpreadsheetApp.getActiveSheet();
+  sheet.appendRow([timestamp, leaveDate, leaveTime, TOorTOA, calculateFrom]);
+  
+}
+
+//Index.html
+<!DOCTYPE html>
+<html>
+  <head>
+    <base target="_top">
+  </head>
+  
+  <style>
+
+body {
+    background-image: linear-gradient(53deg, #ebff8b, #6bc14f);
+}
+
+:root {
+    --custom-fontSize: 4vw;
+}      
+      
+.container {
+    background-color: white;
+    color: #373737;
+    font-family: 'Montserrat',sans-serif;
+    padding: 0 6%;
+    margin: 10vh 0 0 0;
+    height: 90vh;
+}
+
+h2 {
+    font-size: 7.5vw;
+    text-align: center;
+    padding: 30% 0 10% 0;
+}
+
+.question {
+    font-size: var(--custom-fontSize);
+    margin: 30px 0;
+}
+
+
+.input-box { 
+  position: relative; 
+}
+
+.unit-label { 
+    position: absolute;
+    top: 34%;
+    left: 10%;
+    display: block;
+    color: #aeaeae;
+    z-index: 9;
+}
+
+input{
+    display: block;
+    width: 100%;
+    background-color: #e5e5e5;
+    padding: 43px 7% 43px 37%;
+    border-color: transparent;
+    border-radius: 103px;
+    box-sizing: border-box;
+    font-size: var(--custom-fontSize);
+    color: #696969;
+}
+    
+.radiocontainer {
+    width: 100%;
+    padding: 17px;
+    border-color: transparent;
+    border-radius: 96px;
+    box-sizing: border-box;
+    font-size: var(--custom-fontSize);
+    color: #333333;
+    background-color: #e5e5e5;
+    display: flex;
+    flex-direction: row;
+}
+
+input[type=radio] { 
+display: none;
+}
+
+input[type="radio"]+label {
+    flex: 1;
+    display: block;
+    text-align: center;
+    padding: 27px 15px;
+}
+
+input[type="radio"][value="TO"]:checked+label{
+    background-color: #5dc648;
+    border-top-left-radius: 100px;
+    border-bottom-left-radius: 100px;
+    border-top-right-radius: 20px;
+    border-bottom-right-radius: 20px;
+}
+      
+input[type="radio"][value="TOA"]:checked+label{
+    background-color: #5dc648;
+    border-top-right-radius: 100px;
+    border-bottom-right-radius: 100px;
+    border-top-left-radius: 20px;
+    border-bottom-left-radius: 20px;
+}      
+
+button {
+    background-color: #8947b6;
+    border: none;
+    color: white;
+    padding: 43px;
+    width: 100%;
+    border-radius: 60px;
+    font-size: var(--custom-fontSize);
+    margin: 65px 0 0 0;
+}
+    
+div#console {
+    font-size: 2em;
+    margin: 15px 0 0 1vw;
+}
+</style>
+    
+<body>
+
+    <div class="container" onSubmit="return send()">
+
+        <h2>Leave Time Record</h2>
+
+
+        
+        <div class="question">
+            <div class='input-box'>
+        	   <span class="unit-label">Leave Date</span>
+        	   <input type="date" id="leaveDate" placeholder="2023/4/13" class="form-control" onfocus="this.showPicker()" required>
+            </div>    
+        </div>
+
+
+
+        
+        <div class="question">
+        	<div class='input-box'>
+        	   <span class="unit-label">Leave Time</span>
+                <input type="time" id="leaveTime" onfocus="this.showPicker()" required>
+            </div>       
+        </div>
+
+
+
+        
+        <div class="question">
+            <div class='input-box'>
+        	   <span class="unit-label">Count From</span>
+                <input type="time" id="calculateFrom" onfocus="this.showPicker()" required>
+            </div>
+        </div>
+
+        
+
+
+        <div class="question">
+            <div id="toype" class='radiocontainer'>
+              <input type="radio" id="TO" name="TOtype" value="TO" checked>
+              <label for="TO">TO</label>
+              
+              <input type="radio" id="TOA" name="TOtype" value="TOA">
+              <label for="TOA">TOA</label>
+   			</div>
+        </div>
+
+
+
+    <button type="button" onclick="send()"><b>Submit</b></button>
+    <div id='console'>console</div>
+</div>
+
+
+
+
+  </body>
+  <script>
+    //deafult values
+    let nowdtobj = new Date();
+    document.getElementById('console').innerText = 'new Date() returns: ' + nowdtobj.toLocaleString();
+    document.getElementById('leaveDate').value = nowdtobj.toISOString().split('T', 1)[0];
+    //document.getElementById('leaveTime').value = nowdtobj.getHours() + ':' + nowdtobj.getMinutes();
+    document.getElementById('calculateFrom').value = '17:38';
+    
+
+    function send(){
+      let timestamp, leaveDate, leaveTime, TOorTOA, calculateFrom;
+        
+      let inputelms = document.querySelectorAll('input');
+      for (let i=0; i<inputelms.length; i++){
+          if(!inputelms[i].value){
+              alert("Need To Fill In All Fields!");
+              return;
+          }
+      }
+
+      timestamp = (new Date()).toLocaleString(); //create new Date() because want to record timestamp of sending
+      leaveDate = document.getElementById('leaveDate').value;
+      leaveTime = document.getElementById('leaveTime').value;
+      TOorTOA = document.querySelector('input[name="TOtype"]:checked').value;
+      calculateFrom = document.getElementById('calculateFrom').value;
+
+      document.getElementById('leaveDate').value = '';
+      document.getElementById('leaveTime').value = '';
+      //document.querySelector('input[name="TOtype"]:checked').value;
+      document.getElementById('calculateFrom').value = ''
+
+      document.getElementById('console').innerText += '\nData sent to google sheets: ' + [timestamp, leaveDate, leaveTime, TOorTOA, calculateFrom];
+      google.script.run.doSomething(timestamp, leaveDate, leaveTime, TOorTOA, calculateFrom);
+
+    }
+  </script>
+</html>
